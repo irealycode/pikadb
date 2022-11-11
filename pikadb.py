@@ -60,7 +60,7 @@ def add_doc(table,doc,data):
         f = db_read.read()
         db_read.close()
         z = json.loads(f)
-        ret = 'already exists'
+        ret = 'already exists, maybe you meant update?'
     except:
         db_write = open(f'{Path.home()}/.dbs/{db}/{table}/{doc}', 'w')
         db_write.write(json.dumps(data))
@@ -68,14 +68,16 @@ def add_doc(table,doc,data):
     return ret
 
 def delete_doc(table,doc):
-    ret = {}
+    ret = ''
     try:
-        db_read = open(f'{Path.home()}/.dbs/{db}/{table}/{doc}', 'r')
-        f = db_read.read()
-        db_read.close()
-        z = json.loads(f)
-        os.remove(f'{Path.home()}/.dbs/{db}/{table}/{doc}')
-        ret = 'deleted'
+        yn = input(f"are you sure you want to delete {doc} y/n? ")
+        if yn == "y":
+            db_read = open(f'{Path.home()}/.dbs/{db}/{table}/{doc}', 'r')
+            f = db_read.read()
+            db_read.close()
+            z = json.loads(f)
+            os.remove(f'{Path.home()}/.dbs/{db}/{table}/{doc}')
+            ret = 'deleted'
     except:
         ret = 'doesnt exist'
     return ret
@@ -131,6 +133,7 @@ def list_docs(table):
         ret = 'none'
     return ret
 
+commands = ["dbs","add","docs","use","dump","exit","help","delete","update"]
 
 while 1:
     try:
@@ -142,28 +145,82 @@ while 1:
                 print(list_tables())
             else:
                 print("none")
-        elif command.startswith("docs"):
+        elif command.startswith("get "):
+            cmd =command.split()
+            if db != '' and len(cmd) > 3 :
+                table = cmd[3]
+                doc = cmd[1]
+                if table:
+                    print(get_doc(table,doc))
+                else:
+                    print("table?")
+            else:
+                print("none")
+        elif command.startswith("add "):
+            cmd =command.split()
+            if db != '' and len(cmd) == 6 :
+                table = cmd[3]
+                doc = cmd[1]
+                data = cmd[5]
+                try:
+                    data = json.loads(data)
+                    if table:
+                        print(add_doc(table,doc,data))
+                    else:
+                        print("table?")
+                except:
+                    print(f"error: {Fore.RED +'invalid data!'+ Fore.RESET}")
+            else:
+                print("none")
+        elif command.startswith("update "):
+            cmd =command.split()
+            if db != '' and len(cmd) == 6 :
+                table = cmd[3]
+                doc = cmd[1]
+                data = cmd[5]
+                try:
+                    data = json.loads(data)
+                    if table:
+                        print(update_doc(table,doc,data))
+                    else:
+                        print("table?")
+                except:
+                    print(f"error: {Fore.RED +'invalid data!'+ Fore.RESET}")
+            else:
+                print("none")
+        elif command.startswith("delete "):
+            cmd =command.split()
+            if db != '' and len(cmd) > 3 :
+                table = cmd[3]
+                doc = cmd[1]
+                if table:
+                    print(delete_doc(table,doc))
+                else:
+                    print("table?")
+            else:
+                print("none")
+        elif command.startswith("docs "):
             cmd =command.split()
             if db != '' and len(cmd) > 1 :
-                table = command.split()[1]
+                table = cmd[1]
                 if table:
                     print(list_docs(table))
                 else:
                     print("table?")
             else:
                 print("none")
-        elif command.startswith("use"):
+        elif command.startswith("use "):
             cmd = command.split()
             if len(cmd) > 1:
                 db_c = command.split()[1]
                 if db_exists(db_c)==0:
                     print(f"using {db_c}")
-                    db = command.split()[1]
+                    db = cmd[1]
                 else:
                     print("none")
             else:
                 print("use what?")
-        elif command.startswith("dump"):
+        elif command.startswith("dump "):
             cmd = command.split()
             if db != '' and len(cmd) > 1 :
                 table_c = command.split()[1]
@@ -179,16 +236,22 @@ while 1:
         elif command == "help":
             print(
             """ 
-pikdb commands:
-help         : shows this help menu
-dump /table/ : gets every doc in the table
-docs /table/ : shows all docs in the table
-dbs          : show all dbs
-table        : show all tables in the selected db
-use /db/     : selects /db/ as the current used db
+                  help : shows this help menu
+                  exit : closes pikadb
+          dump /table/ : gets every doc in the table
+          docs /table/ : shows all docs in the table
+                   dbs : show all dbs
+                 table : show all tables in the selected db
+              use /db/ : selects /db/ as the current used db
+               get /doc/ from /table/ : displays content of /doc/ from /table/
+   add /doc/ to /table/ with {/data/} : adds /doc/ to /table/ with {/data/} inside
+update /doc/ to /table/ with {/data/} : updates /doc/ to /table/ with {/data/} inside
+            delete /doc/ from /table/ : deletes /doc/ from /table/
             """)
         else:
-            print(f"unknown comand {Fore.RED +command + Fore.RESET}")
+            if  command.split()[0] in commands: 
+                print(f"type help to see how to use")
+            else:
+                print(f"unknown comand {Fore.RED +command.split()[0] + Fore.RESET}")
     except KeyboardInterrupt:
         print("")
-       

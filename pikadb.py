@@ -3,12 +3,28 @@ import os
 from pathlib import Path
 from colorama import Fore, Back, Style
 import readline
+import random
 
 db = ""
 
-print(f""" 
+banner = [f"""
+         __       __          _             __               __           __        
+        /\ \     /\ \       /\_\           / /\             /\ \         / /\      
+       /  \ \    \ \ \     / / /  _       / /  \           /  \ \____   / /  \     
+      / /\ \ \   /\ \_\   / / /  /\_\    / / /\ \         / /\ \_____\ / / /\ \    
+     / / /\ \_\ / /\/_/  / / /__/ / /   / / /\ \ \       / / /\/___  // / /\ \ \   
+    / / /_/ / // / /    / /\_____/ /   / / /  \ \ \     / / /   / / // / /\ \_\ \  
+   / / /__\/ // / /    / /\_______/   / / /___/ /\ \   / / /   / / // / /\ \ \___\ 
+  / / /_____// / /    / / /\ \ \     / / /_____/ /\ \ / / /   / / // / /  \ \ \__/ 
+ / / /   ___/ / /__  / / /  \ \ \   / /_________/\ \ \\ \ \__/ / // / /____\_\ \   
+/ / /   /\__\/_/___\/ / /    \ \ \ / / /_       __\ \_\\ \___\/ // / /__________\  
+\/_/    \/_________/\/_/      \_\_\\_\___\     /____/_/ \/_____/ \/_____________/  
+                            
+                            pikadb v1.1                                                                                   
+                        made by : {Fore.YELLOW + 'irealycode'+ Fore.RESET}
+                    https://github.com/irealycode
+""",f""" 
 
-           __  __                        __  __       
           /  |/  |                      /  |/  |      
   ______  $$/ $$ |   __   ______    ____$$ |$$ |____  
  /      \ /  |$$ |  /  | /      \  /    $$ |$$      \ 
@@ -21,7 +37,39 @@ $$ |
 $$ |                pikadb v1.1                            
 $$/             made by : {Fore.YELLOW + 'irealycode'+ Fore.RESET}    
             https://github.com/irealycode
-""")
+""",f""" 
+                                    
+              )         (        )  
+       (   ( /(     )   )\ )  ( /(  
+ `  )  )\  )\()) ( /(  (()/(  )\()) 
+ /(/( ((_)((_)\  )(_))  ((_))((_)\  
+((_)_\ (_)| |(_)((_)_   _| | | |(_) 
+| '_ \)| || / / / _` |/ _` | | '_ \ 
+| .__/ |_||_\_\ \__,_|\__,_| |_.__/ 
+|_|                                 
+
+                pikadb v1.1                                                                                   
+            made by : {Fore.YELLOW + 'irealycode'+ Fore.RESET}
+        https://github.com/irealycode                                     
+
+""",f""" 
+
+ ██▓███   ██▓ ██ ▄█▀▄▄▄      ▓█████▄  ▄▄▄▄   
+▓██░  ██▒▓██▒ ██▄█▒▒████▄    ▒██▀ ██▌▓█████▄ 
+▓██░ ██▓▒▒██▒▓███▄░▒██  ▀█▄  ░██   █▌▒██▒ ▄██
+▒██▄█▓▒ ▒░██░▓██ █▄░██▄▄▄▄██ ░▓█▄   ▌▒██░█▀  
+▒██▒ ░  ░░██░▒██▒ █▄▓█   ▓██▒░▒████▓ ░▓█  ▀█▓
+▒▓▒░ ░  ░░▓  ▒ ▒▒ ▓▒▒▒   ▓▒█░ ▒▒▓  ▒ ░▒▓███▀▒
+░▒ ░      ▒ ░░ ░▒ ▒░ ▒   ▒▒ ░ ░ ▒  ▒ ▒░▒   ░ 
+░░        ▒ ░░ ░░ ░  ░   ▒    ░ ░  ░  ░    ░ 
+          ░  ░  ░        ░  ░   ░     ░      
+                              ░            ░ 
+                pikadb v1.1                                                                                   
+            made by : {Fore.YELLOW + 'irealycode'+ Fore.RESET}
+        https://github.com/irealycode 
+
+"""]
+print(banner[random.randint(0,3)])
 
 def get_doc(table,doc):
     #checks if doc exists and gets data
@@ -88,9 +136,9 @@ def add_table(db_c,table):
 def delete_doc(table,doc):
     ret = ''
     try:
+        db_read = open(f'{Path.home()}/.dbs/{db}/{table}/{doc}', 'r')
         yn = input(f"are you sure you want to delete {doc} y/n? ")
         if yn == "y":
-            db_read = open(f'{Path.home()}/.dbs/{db}/{table}/{doc}', 'r')
             f = db_read.read()
             db_read.close()
             z = json.loads(f)

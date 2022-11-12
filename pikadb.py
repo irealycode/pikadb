@@ -4,9 +4,9 @@ from pathlib import Path
 from colorama import Fore, Back, Style
 import readline
 
-db = "numbers"
+db = ""
 
-print(""" 
+print(f""" 
 
            __  __                        __  __       
           /  |/  |                      /  |/  |      
@@ -19,8 +19,8 @@ $$    $$/ $$ |$$ | $$  |$$    $$ |$$    $$ |$$    $$/
 $$$$$$$/  $$/ $$/   $$/  $$$$$$$/  $$$$$$$/ $$$$$$$/  
 $$ |                                                  
 $$ |                pikadb v1.1                            
-$$/             made by irealycode                                  
-
+$$/             made by : {Fore.YELLOW + 'irealycode'+ Fore.RESET}    
+            https://github.com/irealycode
 """)
 
 def get_doc(table,doc):
@@ -65,6 +65,24 @@ def add_doc(table,doc,data):
         db_write = open(f'{Path.home()}/.dbs/{db}/{table}/{doc}', 'w')
         db_write.write(json.dumps(data))
         ret = 'added'
+    return ret
+
+def add_db(db_c):
+    ret = {}
+    try:
+        os.mkdir(f'{Path.home()}/.dbs/{db_c}/')
+        ret = 'db created'
+    except:
+        ret = 'already exists'
+    return ret
+
+def add_table(db_c,table):
+    ret = {}
+    try:
+        os.mkdir(f'{Path.home()}/.dbs/{db_c}/{table}/')
+        ret = 'table created'
+    except:
+        ret = 'already exists'
     return ret
 
 def delete_doc(table,doc):
@@ -133,8 +151,8 @@ def list_docs(table):
         ret = 'none'
     return ret
 
-commands = ["dbs","add","docs","use","dump","exit","help","delete","update"]
-
+commands = ["dbs","add","docs","use","dump","exit","help","delete","update","make"]
+special_characters = "'!@#$%^&*()-+?=,\<>/\""
 while 1:
     try:
         command = input(f"pikadb[{Fore.GREEN + db + Fore.RESET}]> ")
@@ -230,6 +248,24 @@ while 1:
                     print("table?")
             else:
                 print("none")
+        elif command.startswith("make "):
+            cmd =command.split()
+            if len(cmd) == 3 :
+                if cmd[1] == 'db' and not any(c in special_characters for c in cmd[2]):
+                    table_db = cmd[2]
+                    if table_db:
+                        print(add_db(table_db))
+                    else:
+                        print("table?")
+                elif cmd[1] == 'table' and not any(c in special_characters for c in cmd[2]):
+                    table_db = cmd[2]
+                    if db != '':
+                        print(add_table(db,table_db))
+                else:
+                    print("you have to select either db or table \nyou cant have special characters except _")
+                
+            else:
+                print(f"{Fore.RED +'error in arguments!' + Fore.RESET}")
         elif command == "exit":
             print("bye.")
             exit()
@@ -243,6 +279,7 @@ while 1:
                    dbs : show all dbs
                  table : show all tables in the selected db
               use /db/ : selects /db/ as the current used db
+                 make db/table /name/ : creates a new db or table
                get /doc/ from /table/ : displays content of /doc/ from /table/
    add /doc/ to /table/ with {/data/} : adds /doc/ to /table/ with {/data/} inside
 update /doc/ to /table/ with {/data/} : updates /doc/ to /table/ with {/data/} inside

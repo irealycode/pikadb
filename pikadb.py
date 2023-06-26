@@ -1,29 +1,17 @@
+from hashlib import md5
 import json
 import os
 from pathlib import Path
 from colorama import Fore, Back, Style
 import readline
 import random
+from cryptography.fernet import Fernet
+import base64
 
 db = ""
-
-banner = [f"""
-         __       __          _             __               __           __        
-        /\ \     /\ \       /\_\           / /\             /\ \         / /\      
-       /  \ \    \ \ \     / / /  _       / /  \           /  \ \____   / /  \     
-      / /\ \ \   /\ \_\   / / /  /\_\    / / /\ \         / /\ \_____\ / / /\ \    
-     / / /\ \_\ / /\/_/  / / /__/ / /   / / /\ \ \       / / /\/___  // / /\ \ \   
-    / / /_/ / // / /    / /\_____/ /   / / /  \ \ \     / / /   / / // / /\ \_\ \  
-   / / /__\/ // / /    / /\_______/   / / /___/ /\ \   / / /   / / // / /\ \ \___\ 
-  / / /_____// / /    / / /\ \ \     / / /_____/ /\ \ / / /   / / // / /  \ \ \__/ 
- / / /   ___/ / /__  / / /  \ \ \   / /_________/\ \ \\ \ \__/ / // / /____\_\ \   
-/ / /   /\__\/_/___\/ / /    \ \ \ / / /_       __\ \_\\ \___\/ // / /__________\  
-\/_/    \/_________/\/_/      \_\_\\_\___\     /____/_/ \/_____/ \/_____________/  
-                            
-                            pikadb v1.1                                                                                   
-                        made by : {Fore.YELLOW + 'irealycode'+ Fore.RESET}
-                    https://github.com/irealycode
-""",f""" 
+db_user = "public"
+db_pass = "4c9184f37cff01bcdc32dc486ec36961"
+banner = [f""" {Fore.GREEN}
 
           /  |/  |                      /  |/  |      
   ______  $$/ $$ |   __   ______    ____$$ |$$ |____  
@@ -34,10 +22,10 @@ $$ |__$$ |$$ |$$$$$$  \ /$$$$$$$ |$$ \__$$ |$$ |__$$ |
 $$    $$/ $$ |$$ | $$  |$$    $$ |$$    $$ |$$    $$/ 
 $$$$$$$/  $$/ $$/   $$/  $$$$$$$/  $$$$$$$/ $$$$$$$/  
 $$ |                                                  
-$$ |                pikadb v1.1                            
-$$/             made by : {Fore.YELLOW + 'irealycode'+ Fore.RESET}    
+$$ |                {Fore.RESET}pikadb v1.1 {Fore.GREEN}                           
+$$/             {Fore.RESET}made by : {Fore.YELLOW + 'irealycode'+ Fore.RESET}    
             https://github.com/irealycode
-""",f""" 
+""",f""" {Fore.RED}
                                     
               )         (        )  
        (   ( /(     )   )\ )  ( /(  
@@ -47,12 +35,12 @@ $$/             made by : {Fore.YELLOW + 'irealycode'+ Fore.RESET}
 | '_ \)| || / / / _` |/ _` | | '_ \ 
 | .__/ |_||_\_\ \__,_|\__,_| |_.__/ 
 |_|                                 
-
+{Fore.RESET}
                 pikadb v1.1                                                                                   
             made by : {Fore.YELLOW + 'irealycode'+ Fore.RESET}
         https://github.com/irealycode                                     
 
-""",f""" 
+""",f""" {Fore.WHITE}
 
  ██▓███   ██▓ ██ ▄█▀▄▄▄      ▓█████▄  ▄▄▄▄   
 ▓██░  ██▒▓██▒ ██▄█▒▒████▄    ▒██▀ ██▌▓█████▄ 
@@ -64,12 +52,12 @@ $$/             made by : {Fore.YELLOW + 'irealycode'+ Fore.RESET}
 ░░        ▒ ░░ ░░ ░  ░   ▒    ░ ░  ░  ░    ░ 
           ░  ░  ░        ░  ░   ░     ░      
                               ░            ░ 
-                pikadb v1.1                                                                                   
+     {Fore.RESET}pikadb v1.1                                                                                   
             made by : {Fore.YELLOW + 'irealycode'+ Fore.RESET}
         https://github.com/irealycode 
 
 """]
-print(banner[random.randint(0,3)])
+print(banner[random.randint(0,2)])
 
 
 class PikaDB:
@@ -77,9 +65,12 @@ class PikaDB:
         #checks if doc exists and gets data
         ret = {}
         try:
+            k= base64.urlsafe_b64encode(db_pass.encode())
+            fr= Fernet(k)
             db_read = open(f'{Path.home()}/.dbs/{db}/{table}/{doc}', 'r')
             f = db_read.read()
             db_read.close()
+            f = fr.decrypt(f.encode()).decode()
             ret = json.loads(f)
         except:
             ret = 'none'
@@ -89,15 +80,19 @@ class PikaDB:
         #update or add items to doc
         ret = {}
         try:
+            k= base64.urlsafe_b64encode(db_pass.encode())
+            fr= Fernet(k)
             db_read = open(f'{Path.home()}/.dbs/{db}/{table}/{doc}', 'r')
             f = db_read.read()
             db_read.close()
+            f = fr.decrypt(f.encode()).decode()
             z = json.loads(f)
             lst = list(data.keys())
             for i in range(len(lst)):
                 z[lst[i]] = data[lst[i]]
             db_write = open(f'{Path.home()}/.dbs/{db}/{table}/{doc}', 'w')
-            db_write.write(json.dumps(z))
+            t = fr.encrypt(json.dumps(z).encode()).decode()
+            db_write.write(t)
             ret = 'updated'
         except:
             ret = 'none'
@@ -109,11 +104,14 @@ class PikaDB:
             db_read = open(f'{Path.home()}/.dbs/{db}/{table}/{doc}', 'r')
             f = db_read.read()
             db_read.close()
-            z = json.loads(f)
+
             ret = 'already exists, maybe you meant update?'
         except:
+            k= base64.urlsafe_b64encode(db_pass.encode())
+            f= Fernet(k)
             db_write = open(f'{Path.home()}/.dbs/{db}/{table}/{doc}', 'w')
-            db_write.write(json.dumps(data))
+            enc = f.encrypt(json.dumps(data).encode())
+            db_write.write(enc.decode())
             ret = 'added'
         return ret
 
@@ -121,6 +119,11 @@ class PikaDB:
         ret = {}
         try:
             os.mkdir(f'{Path.home()}/.dbs/{db_c}/')
+            k= base64.urlsafe_b64encode(db_pass.encode())
+            f= Fernet(k)
+            ver = f.encrypt((f'/{db_c}+{db_user}/').encode()).decode()
+            t = open(f'{Path.home()}/.dbs/{db_c}/catch.zts','w')
+            t.write(ver)
             ret = 'db created'
         except:
             ret = 'already exists'
@@ -154,6 +157,7 @@ class PikaDB:
         ret = {}
         try:
             x=os.listdir(f'{Path.home()}/.dbs/{db}/{table}/')
+            x.remove('catch.zts')
             for i in range(len(x)):
                 db_read = open(f'{Path.home()}/.dbs/{db}/{table}/{x[i]}', 'r')
                 f = db_read.read()
@@ -167,6 +171,7 @@ class PikaDB:
         ret = {}
         try:
             x=os.listdir(f'{Path.home()}/.dbs/')
+            x.remove("users.zts")
             ret = x
         except:
             ret = 'none'
@@ -187,6 +192,7 @@ class PikaDB:
         ret = {}
         try:
             x=os.listdir(f'{Path.home()}/.dbs/{db}/')
+            x.remove('catch.zts')
             ret = x
         except:
             ret = 'none1'
@@ -200,14 +206,84 @@ class PikaDB:
         except:
             ret = 'none'
         return ret
+    
+    def check_owner(db):
+        t = open(f'{Path.home()}/.dbs/{db}/catch.zts','r')
+        try:
+            k= base64.urlsafe_b64encode(db_pass.encode())
+            f= Fernet(k)
+            f.decrypt(t.read().encode())
+            return 1
+        except:
+            return 0
 
-commands = ["dbs","add","docs","use","dump","exit","help","delete","update","make"]
+
+
+commands = ["dbs","add","docs","use","dump","exit","help","delete","update","make","register"]
 special_characters = "'!@#$%^&*()-+?=,\<>/\""
+
+def register(user:str,pwd:str):
+    try:
+        global db_user
+        global db_pass
+        global db
+        w = open(f'{Path.home()}/.dbs/users.zts','a')
+        w.write(f"{user}:{md5(pwd.encode()).hexdigest()}\n")
+        w.close()
+        db_user = user
+        db_pass = md5(pwd.encode()).hexdigest()
+        db = ""
+        return 1
+    except:
+        return 0
+
+def login(user:str,pwd:str):
+    try:
+        global db_user
+        global db_pass
+        global db
+        w = open(f'{Path.home()}/.dbs/users.zts','r')
+        users = w.read().splitlines()
+        w.close()
+        check = f'{user}:{md5(pwd.encode()).hexdigest()}'
+        if check in users:
+            db_user = user
+            db_pass = md5(pwd.encode()).hexdigest()
+            db = ""
+            return 1
+        else:
+            return 0
+    except:
+        return 0
+
+
 while 1:
     try:
-        command = input(f"pikadb[{Fore.GREEN + db + Fore.RESET}]> ")
+        command = input(f"({Fore.WHITE+db_user+Fore.RESET})pikadb[{Fore.GREEN + db + Fore.RESET}]> ")
         if command == "dbs":
             print(PikaDB.list_dbs())
+        elif command == "login":
+            user = input("username: ")
+            u_pass = input(f"password: {Fore.BLACK}");print(f"{Fore.RESET}",end="")
+            if login(user,u_pass):
+                print(f"{Fore.GREEN +'logged in successfuly.'+ Fore.RESET}")
+            else:
+                print(f"{Fore.RED +'login failed!'+ Fore.RESET}")
+        elif command == "register":
+            user = input("username: ")
+            u_pass = input(f"password: {Fore.BLACK}");print(f"{Fore.RESET}",end="")
+            cu_pass = input(f"confirm password: {Fore.BLACK}");print(f"{Fore.RESET}",end="")
+            if u_pass == cu_pass:
+                if register(user,u_pass):
+                    print(f"{Fore.GREEN +'registered successfuly.'+ Fore.RESET}")
+                else:
+                    print(f"{Fore.RED +'registering has failed!'+ Fore.RESET}")
+            else:
+                print(f"{Fore.RED +'registering has failed!'+ Fore.RESET}")
+        elif command == "logout":
+            db_user = "public"
+            db_pass = "4c9184f37cff01bcdc32dc486ec36961"
+            db=""
         elif command == "tables":
             if db != '':
                 print(PikaDB.list_tables())
@@ -277,11 +353,11 @@ while 1:
                     print("table?")
             else:
                 print("none")
-        elif command.startswith("use "):
+        elif command.startswith("use "):  #################  USE
             cmd = command.split()
             if len(cmd) > 1:
                 db_c = command.split()[1]
-                if PikaDB.db_exists(db_c)==0:
+                if PikaDB.db_exists(db_c)==0 and PikaDB.check_owner(db_c):
                     print(f"using {db_c}")
                     db = cmd[1]
                 else:
@@ -336,9 +412,12 @@ update /doc/ to /table/ with {/data/} : updates /doc/ to /table/ with {/data/} i
             delete /doc/ from /table/ : deletes /doc/ from /table/
             """)
         else:
-            if  command.split()[0] in commands: 
-                print(f"type help to see how to use")
-            else:
-                print(f"unknown comand {Fore.RED +command.split()[0] + Fore.RESET}")
+            try:
+                if  command.split()[0] in commands: 
+                    print(f"type help to see how to use {command.split()[0]}")
+                else:
+                    print(f"unknown comand {Fore.RED +command.split()[0] + Fore.RESET}")
+            except:
+                    print(f"unknown comand")
     except KeyboardInterrupt:
         print("")

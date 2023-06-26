@@ -7,6 +7,7 @@ import readline
 import random
 from cryptography.fernet import Fernet
 import base64
+from sys import argv
 
 db = ""
 db_user = "public"
@@ -52,12 +53,11 @@ $$/             {Fore.RESET}made by : {Fore.YELLOW + 'irealycode'+ Fore.RESET}
 ░░        ▒ ░░ ░░ ░  ░   ▒    ░ ░  ░  ░    ░ 
           ░  ░  ░        ░  ░   ░     ░      
                               ░            ░ 
-     {Fore.RESET}pikadb v1.1                                                                                   
+                {Fore.RESET}pikadb v1.1                                                                                   
             made by : {Fore.YELLOW + 'irealycode'+ Fore.RESET}
         https://github.com/irealycode 
 
 """]
-print(banner[random.randint(0,2)])
 
 
 class PikaDB:
@@ -208,6 +208,7 @@ class PikaDB:
         return ret
     
     def check_owner(db):
+
         t = open(f'{Path.home()}/.dbs/{db}/catch.zts','r')
         try:
             k= base64.urlsafe_b64encode(db_pass.encode())
@@ -217,10 +218,6 @@ class PikaDB:
         except:
             return 0
 
-
-
-commands = ["dbs","add","docs","use","dump","exit","help","delete","update","make","register"]
-special_characters = "'!@#$%^&*()-+?=,\<>/\""
 
 def register(user:str,pwd:str):
     try:
@@ -255,6 +252,38 @@ def login(user:str,pwd:str):
             return 0
     except:
         return 0
+
+for i in range(len(argv)-1):
+    if "--user=" in argv[i+1]:
+        usr = argv[i+1].split("--user=")[1]
+        for y in range(3):
+            u_pass = input(f"password: {Fore.BLACK}");print(f"{Fore.RESET}",end="")
+            if login(usr,u_pass):
+                print(f"{Fore.GREEN +'logged in successfuly.'+ Fore.RESET}")
+                break
+            else:
+                print(f"{Fore.RED +'login failed!'+ Fore.RESET}")
+    elif argv[i+1] == "--help" or argv[i+1] == "-h":
+        print("""usage:
+            --help/-h : for usage
+    --user=/username/ : login as /username/
+       --db=/db name/ : select initial database
+""")
+        exit()
+
+
+for i in range(len(argv)-1):
+    if "--db=" in argv[i+1] and PikaDB.db_exists(argv[i+1].split("--db=")[1])==0 and PikaDB.check_owner(argv[i+1].split("--db=")[1]):
+        db = argv[i+1].split("--db=")[1]
+
+
+
+print(banner[random.randint(0,2)])
+
+commands = ["dbs","add","docs","use","dump","exit","help","delete","update","make","register","login","logout"]
+special_characters = "'!@#$%^&*()-+?=,\<>/\""
+
+
 
 
 while 1:
@@ -361,10 +390,10 @@ while 1:
                     print(f"using {db_c}")
                     db = cmd[1]
                 else:
-                    print("none")
+                    print(f"{Fore.RED +'wrong db or ownership!' + Fore.RESET}")
             else:
                 print("use what?")
-        elif command.startswith("dump "):
+        elif command.startswith("dump "):  ############### DUMP
             cmd = command.split()
             if db != '' and len(cmd) > 1 :
                 table_c = command.split()[1]
@@ -400,6 +429,9 @@ while 1:
             """ 
                   help : shows this help menu
                   exit : closes pikadb
+                 login : log in your account
+              register : sign up for an account
+                logout : go back to the "public" account 
           dump /table/ : gets every doc in the table
           docs /table/ : shows all docs in the table
                    dbs : show all dbs

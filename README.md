@@ -1,7 +1,6 @@
 # pikadb
 open source db,
-was too lazy to learn mongodb so i created pikadb
-if this isn't fast enough i'll rewrite it in cpp should cut a couple milies
+if this isn't fast enough i'll rewrite it in rust or cpp which should be faster by a lot
 
 how to use:
 

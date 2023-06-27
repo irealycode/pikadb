@@ -1,6 +1,6 @@
 # pikadb
-open source db,
-if this isn't fast enough i'll rewrite it in rust or cpp which should be faster by a lot
+##open source db,
+###if this isn't fast enough i'll rewrite it in rust or cpp which should be faster by a lot
 
 how to use:
 
